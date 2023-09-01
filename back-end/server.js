@@ -5,10 +5,17 @@ const mysql = require("mysql");
 
 const port=process.env.PORT || 3000;
 
-//Yagay fill your database details
-const dbName=""
-const userName=""
-const passw=""
+/*
+
+FOR UNIFORMITY
+KEEP DATABASE NAME AS asur
+*/
+
+const dbName="asur"
+const userName="root"
+const passw="RahulSQL2002"//change this when using on your local machine
+
+
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -27,7 +34,7 @@ app.get('/api/getCourseList',(req,res)=>{
     //to get the course list from the subject table
 
     //CHANGE TABLE NAME
-    const query = "SELECT * FROM subject_table";
+    const query = "SELECT * FROM subject";
     connection.query(query, (error, results) => {
     if (error) throw error;
     // console.log(results);
@@ -41,7 +48,7 @@ app.get('/api/getProfile/:studentID',(req,res)=>{
 
     //CHANGE STUDENT TABLE NAME IF NEEDED ACC TO YOUR DB
     const id= req.params.studentID;
-    const query=`SELECT * from student_table where student_id= ${id}`
+    const query=`SELECT * from student where Roll_No= ${id}`
     connection.query(query, (error, results) => {
         if (error) throw error;
         // console.log(results);
