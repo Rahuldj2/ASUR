@@ -1,28 +1,30 @@
-import 'package:Asur/Auth/signup.dart';
-import 'package:Asur/Profile/profile.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:Asur/Auth/login.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Global_Vairables/background_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool loading = false;
+  final _nameController = TextEditingController();
+  late final String name ;
+  late final String email ;
   late FToast  flutterToast;
-
+  bool loading = false;
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     flutterToast= FToast();
     // if you want to use context from globally instead of content we need to pass navigatorKey.currentContext!
@@ -30,7 +32,48 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
 
-  // Function to Show toast
+
+
+  Future<void> addStudent() async {
+name = _nameController.text;
+     email = _emailController.text;
+
+    final Uri uri = Uri.parse('http://your-api-url-here/addStudent');
+    final Map<String, String> data = {
+      'name': name,
+      'email': email,
+    };
+
+    try {
+
+      final response = await http.post(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(data),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        if (responseData['success'] == true) {
+          // Student added successfully, you can handle the success here
+          print('Student added successfully');
+        } else {
+          // Handle the case where adding the student failed
+          print('Failed to add student');
+        }
+      } else {
+        // Handle the case where the server returned an error
+        print('Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Handle any other errors that may occur during the HTTP request
+      print('Error: $e');
+    }
+  }
+
+// function to show toast message for verification link
   _showToast(String s) {
     Widget toast = Container(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
@@ -81,56 +124,47 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         });
   }
+  // Function to create a new user in Firebase Authentication and store additional info in Firestore
+  Future<void> signUpAndStoreUserData() async {
 
-
-
-  //--------------------------------------------FIREBASE LOGIC--------------------------------------------
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  Future<void> setLoggedIn() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool('LogedIn', true);
-  }
-
-  Future<void> loginUser() async {
+    setState(() {
+      loading= true;
+    });
     try {
-      setState(() {
-        loading= true;
-      });
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: _emailController.text, // Use email as the username
+      // Create a new user in Firebase Authentication
+      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text,
         password: _passwordController.text,
       );
+      // Send email verification link
+      // await userCredential.user!.sendEmailVerification();
 
-      // Check if the user's email is verified
-      if (userCredential.user != null ) {
-        // Successfully logged in and email is verified
-        setLoggedIn();
+      // Get the newly created user's UID
+      String userId = userCredential.user!.uid;
 
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Profile()));
-        setState(() {
-          loading= false;
-        });
-      } else {
-        // Email is not verified
-
-        _showToast("Please verify your email before logging in.");
-        setState(() {
-          loading= false;
-        });
-      }
-
-    } catch (e) {
-      print("Error during login: $e");
-      _showToast("Login failed. Please check your credentials.");
-      setState(() {
-        loading= false;
+      // Store additional user data in Firestore
+      await FirebaseFirestore.instance.collection('Users').doc(userId).set({
+        'name': _nameController.text,
+        'email': _emailController.text,
       });
 
+      // TODO: uncomment the  addStudent function for storing data in sql
+
+      //addStudent();
+
+      // Navigate to the home screen or perform other actions
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginScreen()));
+    } catch (e) {
+      // Handle errors
+      _showToast(e.toString());
+      print(e);
     }
+    setState(() {
+      // Show a toast message
+      _showToast("Verification link has been sent to your email");
+      loading=false;
+    });
   }
-
-
-
 
 
 
@@ -141,11 +175,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
-
+// Check if the keyboard is open
+    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
     return Scaffold(
-
+      
       body: SingleChildScrollView(
-        physics: NeverScrollableScrollPhysics(),
+        physics: AlwaysScrollableScrollPhysics(),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: SafeArea(
           child: Container(
             height: height,
@@ -155,11 +191,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Your background gradient container
                 GradientContainer(),
                 // ClipRect to hide upper half of the image
-               !loading? ClipRect(
+              !loading?  ClipRect(
                   child: Align(
                     alignment: FractionalOffset(0.5, -0.35), // Adjust the offset here
                     child: Container(
-                     height: height * 0.5, // Display only half of the image
+                      height: height * 0.5, // Display only half of the image
                       child: Stack(
                         children: [
                           Column(
@@ -181,33 +217,40 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ):SizedBox(height: 0,),
 
-                loading?Center(
-                  child: Container(
-                    padding: EdgeInsets.only(
-                        top: MediaQuery.of(context).size.height * 0.1),
-                    child: const CircularProgressIndicator(
-                        color:Colors.white
-                    ),
-                  ),
-                ): Positioned(
+               loading?Center(
+                 child: Container(
+                   padding: EdgeInsets.only(
+                       top: MediaQuery.of(context).size.height * 0.1),
+                   child: const CircularProgressIndicator(
+                       color:Colors.white
+                   ),
+                 ),
+               ): Positioned(
                   top: height*0.15,
                   left: width/7,
                   right: width/7,
-                  child: Container(
+                  child: SingleChildScrollView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    child: Container(
 
-                    child: Column(
-                      children: [
-                        Text('Login',style: TextStyle(color: Colors.white,fontSize: 44,fontWeight: FontWeight.bold),),
-                        SizedBox(height: height*0.003,),
-                        InkWell(
-                          onTap: (){
-                            Navigator.push(context,MaterialPageRoute(builder: (_)=>SignUpScreen()));
-                          },
-                            child: Text("Don't have a account? Sign Up",style: TextStyle(color: Colors.white,fontSize: 16,fontWeight: FontWeight.w300),)),
+                      child: Column(
+                        children: [
+                          Text('Create new',style: TextStyle(color: Colors.white,fontSize: 40,fontWeight: FontWeight.bold),),
+                          SizedBox(height: height*0.00001,),
+                          Text('Account',style: TextStyle(color: Colors.white,fontSize: 40,fontWeight: FontWeight.bold),),
+                          SizedBox(height: height*0.002,),
+                          InkWell(
+                              onTap: (){
+                                //   go to Login page
+                                Navigator.pushReplacement(context,MaterialPageRoute(builder: (_)=>LoginScreen()));
 
-                        SizedBox(height: height*0.1,),
-                        //Text('Sign in to continue',style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.w300),),
-                      ],
+                              },
+                              child: Text('Already Registered? Login in here',style: TextStyle(color: Colors.white,fontSize: 16,fontWeight: FontWeight.w300),)),
+
+                          SizedBox(height: height*0.1,),
+                          //Text('Sign in to continue',style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.w300),),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -225,11 +268,69 @@ class _LoginScreenState extends State<LoginScreen> {
                   top: height*0.4,
                   left: width/9,
                   right: width/8,
-                  child: Container(
-
+                  child: SingleChildScrollView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    keyboardDismissBehavior:ScrollViewKeyboardDismissBehavior.manual,
+                    reverse: true,
                     child: Column(
+
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+
+
+                        // NAME FIELD
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Text('NAME ',style: TextStyle(color: Colors.white,fontSize: 15),),
+                        ),
+                        SizedBox(height: height*0.01,),
+                        // Email Field
+                        Container(
+
+                          height: height*0.06,
+
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color:Color(0xffA3A2A2),
+                            border: Border.all(
+                                width: 2,
+                                color: Colors.black),
+                            borderRadius:
+                            BorderRadius.circular(13),
+
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 18.0),
+                            child: TextFormField(
+
+                              controller: _nameController,
+
+
+
+                              textAlign: TextAlign.left,
+                              decoration: InputDecoration(
+                                contentPadding: EdgeInsets.symmetric(vertical: 10),
+                                fillColor:Color(0xffA3A2A2),
+                                filled: true,
+                                // errorStyle: TextStyle(height: 0.5),
+                                hintStyle: TextStyle(color: Color(0xB310100E)),
+                                hintText: 'Name',
+                                border: OutlineInputBorder(
+                                    borderRadius:
+                                    BorderRadius.circular(15),
+                                    borderSide:  BorderSide.none
+
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: height*0.01,),
+
+
+
+
+                        // EMAIL
                         Padding(
                           padding: const EdgeInsets.only(left: 8.0),
                           child: Text('EMAIL ',style: TextStyle(color: Colors.white,fontSize: 15),),
@@ -302,7 +403,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: TextFormField(
 
                               controller:_passwordController,
-obscureText: true,
+
                               textAlign: TextAlign.left,
                               decoration: InputDecoration(
                                 contentPadding: EdgeInsets.symmetric(vertical: 10),
@@ -323,11 +424,12 @@ obscureText: true,
                         ),
 
                         SizedBox(height: height*0.1,),
-                        // Login Button
+                        // Sign Up Button
                         InkWell(
                           onTap: (){
-                            // manage on tap on Log in Button
-                            loginUser();
+                            // manage on tap on Sign upButton
+                            print('here');
+                            signUpAndStoreUserData();
                           },
                           child: Container(
 
@@ -340,7 +442,7 @@ obscureText: true,
                               BorderRadius.circular(15),
 
                             ),
-                            child: Center(child: Text("Log In",style: TextStyle(decoration:TextDecoration.underline
+                            child: Center(child: Text("Sign Up",style: TextStyle(decoration:TextDecoration.underline
                                 ,color: Colors.white,fontSize: 20,fontWeight: FontWeight.bold))),
 
                           ),
@@ -350,6 +452,7 @@ obscureText: true,
                         InkWell(
                             onTap: (){
                               // navigate to Sign Up
+
                             },
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,

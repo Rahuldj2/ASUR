@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "653677327927",
+    "project_id": "asur-snu",
+    "storage_bucket": "asur-snu.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:653677327927:android:a556c54f834cb1f40db1b2",
+        "android_client_info": {
+          "package_name": "com.example.asur"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "653677327927-eai9hm3soo0f2t2p2687vf4f3ccnlrhb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdEdHNcsVHUHU5_ROTd1F_H_DErJXqsRc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "653677327927-eai9hm3soo0f2t2p2687vf4f3ccnlrhb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
