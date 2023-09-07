@@ -2,20 +2,21 @@ import 'package:flutter/material.dart';
 
 import '../Global_Vairables/background_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
 
 
     final _emailController = TextEditingController();
     final _passwordController = TextEditingController();
+    final _nameController = TextEditingController();
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
 
@@ -29,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Align(
               alignment: FractionalOffset(0.5, -0.36), // Adjust the offset here
               child: Container(
-               height: height * 0.5, // Display only half of the image
+                height: height * 0.5, // Display only half of the image
                 child: Stack(
                   children: [
                     Column(
@@ -58,15 +59,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
           Positioned(
             top: height*0.15,
-            left: width/4,
-            right: width/4,
+            left: width/5,
+            right: width/5,
             child: Container(
 
               child: Column(
                 children: [
-                  Text('Login',style: TextStyle(color: Colors.white,fontSize: 44,fontWeight: FontWeight.bold),),
+                  Text('Create new',style: TextStyle(color: Colors.white,fontSize: 44,fontWeight: FontWeight.bold),),
+                  SizedBox(height: height*0.00001,),
+                  Text('Account',style: TextStyle(color: Colors.white,fontSize: 44,fontWeight: FontWeight.bold),),
                   SizedBox(height: height*0.001,),
-                  Text('Sign in to continue',style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.w300),),
+                  Text('Sign up to continue',style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.w300),),
 
                   SizedBox(height: height*0.1,),
                   //Text('Sign in to continue',style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.w300),),
@@ -85,6 +88,61 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+
+
+                  // NAME FIELD
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text('NAME ',style: TextStyle(color: Colors.white,fontSize: 15),),
+                  ),
+                  SizedBox(height: height*0.01,),
+                  // Email Field
+                  Container(
+
+                    height: height*0.06,
+
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color:Color(0xffA3A2A2),
+                      border: Border.all(
+                          width: 2,
+                          color: Colors.black),
+                      borderRadius:
+                      BorderRadius.circular(13),
+
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 18.0),
+                      child: TextFormField(
+
+                        controller: _nameController,
+
+
+
+                        textAlign: TextAlign.left,
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.symmetric(vertical: 10),
+                          fillColor:Color(0xffA3A2A2),
+                          filled: true,
+                          // errorStyle: TextStyle(height: 0.5),
+                          hintStyle: TextStyle(color: Color(0xB310100E)),
+                          hintText: 'Name',
+                          border: OutlineInputBorder(
+                              borderRadius:
+                              BorderRadius.circular(15),
+                              borderSide:  BorderSide.none
+
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: height*0.01,),
+
+
+
+
+                  // EMAIL
                   Padding(
                     padding: const EdgeInsets.only(left: 8.0),
                     child: Text('EMAIL ',style: TextStyle(color: Colors.white,fontSize: 15),),
@@ -177,11 +235,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
 
-                  SizedBox(height: height*0.16,),
-                  // Login Button
+                  SizedBox(height: height*0.1,),
+                  // Sign Up Button
                   InkWell(
                     onTap: (){
-                      // manage on tap on Log in Button
+                      // manage on tap on Sign upButton
                     },
                     child: Container(
 
@@ -194,7 +252,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         BorderRadius.circular(15),
 
                       ),
-                      child: Center(child: Text("Log In",style: TextStyle(decoration:TextDecoration.underline
+                      child: Center(child: Text("Sign Up",style: TextStyle(decoration:TextDecoration.underline
                           ,color: Colors.white,fontSize: 20,fontWeight: FontWeight.bold))),
 
                     ),
@@ -205,7 +263,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       onTap: (){
                         // navigate to Sign Up
                       },
-                      child: Center(child: Text('Sign Up',style: TextStyle(color: Colors.white,fontSize: 20,fontWeight: FontWeight.w100),))),
+                      child: Center(child: Text('Already Registered? Log in here',style: TextStyle(color: Colors.white,fontSize: 20,fontWeight: FontWeight.w100),))),
                 ],
               ),
             ),
