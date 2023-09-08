@@ -85,7 +85,10 @@ app.get('/api/getClassroomDetails', (req, res) => {
     });
   });
   
-  
+  //the above login endpoint will post  image url from this endpoint
+app.post('/api/image/:studentID',(req,res)=>{
+
+})
 
 //the above login endpoint will get image from this endpoint
 app.get('/api/image/:studentID',(req,res)=>{
