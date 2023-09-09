@@ -1,6 +1,7 @@
 const express=require('express');
 const app=express();
 const mysql = require('mysql');
+const bodyParser=require('body-parser')
 
 
 const port=process.env.PORT || 3000;
@@ -16,7 +17,7 @@ const userName="root"
 const passw="RahulSQL2002"//change this when using on your local machine
 
 
-
+app.use(bodyParser.json());
 const connection = mysql.createConnection({
   host: "localhost",
   user: userName,
@@ -65,7 +66,7 @@ app.get('/api/getClassroomDetails', (req, res) => {
     // Replace 'student_table' with your actual student table name
     const query = `SELECT * FROM classroom WHERE room_id = (SELECT classroom_id FROM subject WHERE subject_id = '${coursecode}')`;
   
-    db.query(query, (err, results) => {
+    connection.query(query, (err, results) => {
       if (err) {
         console.error('Error retrieving classroom details:', err);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -86,12 +87,38 @@ app.get('/api/getClassroomDetails', (req, res) => {
   });
   
   //the above login endpoint will post  image url from this endpoint
+
+//POST IMAGE ENDPOINT WORKING SUCCESSFULLY
 app.post('/api/image/:studentID',(req,res)=>{
+  const id= req.params.studentID;
+  const {image_url} = req.body;//send image url through body from front end
+  console.log(req.body);
+
+  const query = `UPDATE student
+  SET picture_url = "${image_url}"
+  WHERE Roll_No =${id} `;
+
+  connection.query(query, [image_url], (error, results) => {
+    if (error) throw error;
+    res.send("image url updated successfully");
+  });
+
 
 })
 
 //the above login endpoint will get image from this endpoint
 app.get('/api/image/:studentID',(req,res)=>{
+    const id= req.params.studentID;
+    console.log(id)
+
+    const query=`select picture_url from student where roll_no=${id}`
+
+    connection.query(query, (error, results) => {
+      if (error) throw error;
+      // console.log(results);
+      res.json(results);
+    });
+    
 
 })
 
