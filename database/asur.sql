@@ -16,6 +16,33 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `attendance_details`
+--
+
+DROP TABLE IF EXISTS `attendance_details`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `attendance_details` (
+  `Roll_No` int NOT NULL,
+  `Subject_ID` varchar(10) NOT NULL,
+  `Date` date NOT NULL,
+  `PorA` varchar(5) DEFAULT NULL,
+  PRIMARY KEY (`Roll_No`,`Subject_ID`,`Date`),
+  KEY `index_date` (`Date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `attendance_details`
+--
+
+LOCK TABLES `attendance_details` WRITE;
+/*!40000 ALTER TABLE `attendance_details` DISABLE KEYS */;
+INSERT INTO `attendance_details` VALUES (100,'CSD101','2023-09-10','A'),(100,'CSD101','2023-09-11','P'),(101,'CSD101','2023-09-10','P'),(101,'CSD101','2023-09-11','P'),(102,'CSD101','2023-09-10','P');
+/*!40000 ALTER TABLE `attendance_details` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `classroom`
 --
 
@@ -112,3 +139,5 @@ UNLOCK TABLES;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2023-09-10  1:05:47
