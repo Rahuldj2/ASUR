@@ -123,6 +123,23 @@ app.get('/api/image/:studentID',(req,res)=>{
 })
 
 
+//this endpoint updates the Live column in subject table to L
+app.post('/api/makeClassLive',(req,res)=>{
+  const {course_id}=req.body
+  console.log(req.body)
+
+  const query = `UPDATE subject
+  SET  LIVE= "L"
+  WHERE subject_id="${course_id}" `;
+
+  connection.query(query, [course_id], (error, results) => {
+    if (error) throw error;
+    res.send("Live updated successfully");
+  });
+
+})
+
+
 app.post('/api/markAttendance',(req,res)=>{
     //to insert attendance details into attendance table
     //need to generate unique ID based on date or row number
