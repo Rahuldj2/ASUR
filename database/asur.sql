@@ -27,6 +27,7 @@ CREATE TABLE `attendance_details` (
   `Subject_ID` varchar(10) NOT NULL,
   `Date` date NOT NULL,
   `PorA` varchar(5) DEFAULT NULL,
+  `Percentage` double DEFAULT '0',
   PRIMARY KEY (`Roll_No`,`Subject_ID`,`Date`),
   KEY `index_date` (`Date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -38,7 +39,7 @@ CREATE TABLE `attendance_details` (
 
 LOCK TABLES `attendance_details` WRITE;
 /*!40000 ALTER TABLE `attendance_details` DISABLE KEYS */;
-INSERT INTO `attendance_details` VALUES (100,'CSD101','2023-09-10','A'),(100,'CSD101','2023-09-11','P'),(101,'CSD101','2023-09-10','P'),(101,'CSD101','2023-09-11','P'),(102,'CSD101','2023-09-10','P');
+INSERT INTO `attendance_details` VALUES (100,'CSD101','2023-09-10','A',0),(100,'CSD101','2023-09-11','P',0),(101,'CSD101','2023-09-10','P',0),(101,'CSD101','2023-09-11','P',0),(102,'CSD101','2023-09-10','P',0);
 /*!40000 ALTER TABLE `attendance_details` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -140,4 +141,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-09-10  1:05:47
+-- Dump completed on 2023-09-10  1:56:37
