@@ -140,13 +140,43 @@ app.post('/api/makeClassLive',(req,res)=>{
 })
 
 
+//Tested working as expected
 app.post('/api/markAttendance',(req,res)=>{
     //to insert attendance details into attendance table
-    //need to generate unique ID based on date or row number
+    const{stud_id,course_id,date,attendance_status}=req.body
+    console.log(req.body)
+
+    //This query first tries to insert details. If details are already there it will update present or absent
+    //This is useful in the sense suppose teacher wants to update attendance manually for some student
+    //BE SURE TO SEND DATE FROM THE FRONT END IN YYYY-MM--DD FORMAT
+    const query=`insert into attendance_details values(${stud_id},"${course_id}","${date}","${attendance_status}",0)
+    on duplicate key update PorA="${attendance_status}"`
+
+    connection.query(query,[stud_id,course_id,date,attendance_status],(error,results)=>{
+      if (error) {throw error}
+      else{
+        res.send("Attendance marked successfully");
+      }
+      
+    })
 })
 
-app.get('/api/getAttendance',(req,res)=>{
+//to fetch data and display attendance details for that student
+//working successfully
+app.get('/api/getAttendance/:studentId',(req,res)=>{
     //to get attendance details and display it in app
+    const id=req.params.studentId;
+
+    //we can sort this by date if needed not doing it as of now
+    const query=`select * from attendance_details where roll_no=${id}`
+
+    connection.query(query, (error, results) => {
+      if (error) throw error;
+      console.log(results);
+      res.json(results);
+    });
+
+
 })
 
 
