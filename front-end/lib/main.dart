@@ -1,5 +1,7 @@
 import 'package:Asur/Auth/login.dart';
 import 'package:Asur/Auth/signup.dart';
+import 'package:Asur/Home/homepage.dart';
+import 'package:Asur/Navigator/bottom_navigation.dart';
 import 'package:Asur/SplashScreen/splashscreen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
@@ -26,7 +28,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-
+      theme: ThemeData(
+          fontFamily: "OpenSans",
+          primaryColor : Color(0xff912C2E),
+          hintColor:  Color(0xff912C2E)),
       title: 'ASUR',
 
       home: SplashScreen(),

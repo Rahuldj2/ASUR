@@ -1,4 +1,5 @@
 import 'package:Asur/Auth/signup.dart';
+import 'package:Asur/Navigator/bottom_navigation.dart';
 import 'package:Asur/Profile/profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -131,7 +132,10 @@ class _LoginScreenState extends State<LoginScreen> {
       if (userCredential.user != null) {
         // Successfully logged in and email is verified
         setLoggedIn();
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Profile()));
+
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => BottomNavigation(0)));
+
+
         setState(() {
           loading = false;
         });
