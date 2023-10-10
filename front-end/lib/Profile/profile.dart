@@ -148,49 +148,141 @@ class _ProfileState extends State<Profile> {
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Color(0xff912C2E),
+        title: const Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "ASUR",
+              style: TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Profile",
+              style: TextStyle(
+                fontSize: 13,
+              ),
+            )
+          ],
+        ),
+
+      ),
       body: Stack(
         children: [
           GradientContainer(),
-          loading?Center(
-            child: Container(
-              padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).size.height * 0.1),
-              child: const CircularProgressIndicator(
-                  color:Colors.white
-              ),
-            ),
-          ): Positioned(
-            top: height*0.15,
-            left: width/7,
-            right: width/7,
-            child: Container(
+//           loading?Center(
+//             child: Container(
+//               padding: EdgeInsets.only(
+//                   top: MediaQuery.of(context).size.height * 0.1),
+//               child: const CircularProgressIndicator(
+//                   color:Colors.white
+//               ),
+//             ),
+//           ): Positioned(
+//             top: height*0.15,
+//             left: width/7,
+//             right: width/7,
+//             child: Container(
+//
+//               child: Column(
+//                 children: [
+//                   Text('Hey, $name',style: TextStyle(color: Colors.white,fontSize: 44,fontWeight: FontWeight.bold),),
+// SizedBox(height: height*0.6,),
+//                 //Logout
+//                   InkWell(
+//                     onTap: (){
+//                       // manage change password on Tap
+//                       logoutUser();
+//                     },
+//                     child: Container(
+//                       height: 40,
+//                       width: MediaQuery.sizeOf(context).width*0.76,
+//                       decoration: BoxDecoration(
+//                           color: Colors.black,
+//                           borderRadius: BorderRadius.circular(15)
+//                       ),
+//                       child: Center(child: Text('Logout',style: TextStyle(color: Colors.white,fontWeight: FontWeight.w700,fontSize: 14),)),
+//                     ),
+//                   )
+//
+//                   //Text('Sign in to continue',style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.w300),),
+//                 ],
+//               ),
+//             ),
+//           ),
 
-              child: Column(
-                children: [
-                  Text('$name',style: TextStyle(color: Colors.white,fontSize: 44,fontWeight: FontWeight.bold),),
-SizedBox(height: height*0.1,),
-                //Logout
-                  InkWell(
-                    onTap: (){
-                      // manage change password on Tap
-                      logoutUser();
-                    },
-                    child: Container(
-                      height: 40,
-                      width: MediaQuery.sizeOf(context).width*0.76,
-                      decoration: BoxDecoration(
-                          color: Colors.cyanAccent,
-                          borderRadius: BorderRadius.circular(15)
-                      ),
-                      child: Center(child: Text('Logout',style: TextStyle(color: Colors.white,fontWeight: FontWeight.w700,fontSize: 14),)),
-                    ),
-                  )
 
-                  //Text('Sign in to continue',style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.w300),),
-                ],
+          Positioned(
+
+            top:40,
+            left: 110,
+            right: 110,
+            child: Container(
+              width: 130,
+              height: 130,
+              decoration: const ShapeDecoration(
+                color: Colors.white,
+                shape: CircleBorder(
+                  side: BorderSide(
+                    width: 2.5,
+                    color: Color(0xFFE2E1FA),
+                    style: BorderStyle.solid,
+                  ),
+                ),
               ),
+
             ),
           ),
+
+
+
+          Positioned(
+              top: 190,
+              left: 70,
+              right:70,
+              child: Center(
+                child: Container(
+                  height: MediaQuery.sizeOf(context).height*0.78,
+                  //color: Colors.transparent,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Aayush Arora",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w700,fontSize: 23),),
+                      SizedBox(height: MediaQuery.sizeOf(context).height*0.01,),
+                      Text('Computer Science and Engineering',style: TextStyle(color: Colors.white,fontWeight: FontWeight.w400,fontSize: 23),),
+                      SizedBox(height: MediaQuery.sizeOf(context).height*0.05,),
+                      Text('Payment Status',style: TextStyle(color: Colors.white ,fontWeight: FontWeight.w600,fontSize: 25),),
+                      SizedBox(height: MediaQuery.sizeOf(context).height*0.01,),
+                      Text('Under Process',style: TextStyle(color: Colors.white,fontWeight: FontWeight.w400,fontSize: 23),),
+                      SizedBox(height: MediaQuery.sizeOf(context).height*0.03,),
+                      // Text('Accomodation',style: TextStyle(color: Colors.white ,fontWeight: FontWeight.w600,fontSize: 25),),
+                      // SizedBox(height: MediaQuery.sizeOf(context).height*0.01,),
+                      // Text('3 Nights',style: TextStyle(color: Colors.white,fontWeight: FontWeight.w400,fontSize: 23),),
+                      SizedBox(height: MediaQuery.sizeOf(context).height*0.05,),
+
+                      InkWell(
+                        onTap: (){
+                          // manage change password on Tap
+                          logoutUser();
+                        },
+                        child: Container(
+                          height: 40,
+                          width: MediaQuery.sizeOf(context).width*0.76,
+                          decoration: BoxDecoration(
+                              color: Colors.black,
+                              borderRadius: BorderRadius.circular(15)
+                          ),
+                          child: Center(child: Text('Logout',style: TextStyle(color: Colors.white,fontWeight: FontWeight.w700,fontSize: 14),)),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ))
         ],
       ),
     );

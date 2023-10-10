@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:Asur/Auth/face_Register.dart';
 import 'package:http/http.dart' as http;
 import 'package:Asur/Auth/login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,6 +20,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
+  late User user;
   late final String name ;
   late final String email ;
   late FToast  flutterToast;
@@ -125,7 +127,7 @@ name = _nameController.text;
         });
   }
   // Function to create a new user in Firebase Authentication and store additional info in Firestore
-  Future<void> signUpAndStoreUserData() async {
+  Future<User?> signUpAndStoreUserData() async {
 
     setState(() {
       loading= true;
@@ -140,6 +142,7 @@ name = _nameController.text;
       // await userCredential.user!.sendEmailVerification();
 
       // Get the newly created user's UID
+      user= userCredential.user!;
       String userId = userCredential.user!.uid;
 
       // Store additional user data in Firestore
@@ -153,7 +156,8 @@ name = _nameController.text;
       //addStudent();
 
       // Navigate to the home screen or perform other actions
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginScreen()));
+      return user;
+     // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginScreen()));
     } catch (e) {
       // Handle errors
       _showToast(e.toString());
@@ -426,10 +430,11 @@ name = _nameController.text;
                         SizedBox(height: height*0.1,),
                         // Sign Up Button
                         InkWell(
-                          onTap: (){
-                            // manage on tap on Sign upButton
-                            print('here');
-                            signUpAndStoreUserData();
+                          onTap: () async {
+                            User? newUser = await signUpAndStoreUserData();
+                            if (newUser != null) {
+                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => FaceRegister(user: newUser)));
+                            }
                           },
                           child: Container(
 

@@ -38,6 +38,13 @@ dependencies:
   firebase_core: ^2.4.1
   cloud_firestore: ^4.3.1
   firebase_auth: ^4.2.5
+  percent_indicator: ^4.2.3
+  device_info_plus: ^9.0.3
+  camera: ^0.10.5+5
+  image_picker: ^1.0.2
+  flutter_face_api: ^5.2.0
+  flutter_face_core: ^5.2.0
+  firebase_storage: ^11.2.6
   shared_preferences: ^2.1.0
   fluttertoast: ^8.2.2
   widget_and_text_animator: ^1.0.9
