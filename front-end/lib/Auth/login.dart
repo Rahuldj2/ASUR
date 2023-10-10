@@ -132,7 +132,10 @@ class _LoginScreenState extends State<LoginScreen> {
       if (userCredential.user != null) {
         // Successfully logged in and email is verified
         setLoggedIn();
+
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => BottomNavigation(0)));
+
+
         setState(() {
           loading = false;
         });
