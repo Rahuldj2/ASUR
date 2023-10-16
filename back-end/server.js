@@ -11,6 +11,8 @@ FOR UNIFORMITY
 KEEP DATABASE NAME AS asur
 */
 
+
+
 const dbName="asur"
 const userName="root"
 const passw="RahulSQL2002"//change this when using on your local machine
@@ -41,16 +43,78 @@ app.get('/api/getCourseList',(req,res)=>{
 });
 })
 
-//ENDPOINT FOR OVERALL ATTENDANCE PERCENT FETCHING for a particular student
+//SIGN UP ENDPOINT WORKING SUCCESSFULLY NOW
+//FIRST DETAILS ADDED TO STUDENT TABLE
+//THEN
+app.post('/api/signUpDetails',(req,res)=>{
+  const {FirstName,LastName,DOB,NetId}=req.body;
+  //note that rollNumner is autoincrement
+  const query=`insert into student(First_Name,Last_Name,DOB,Net_ID) 
+  values("${FirstName}","${LastName}","${DOB}","${NetId}");`
+
+  connection.query(query,[FirstName,LastName,DOB,NetId],(error,results)=>{
+    if (error) {throw error}
+    else{
+      const getLastId=`SELECT Roll_No
+      FROM student
+      ORDER BY Roll_No DESC
+      LIMIT 1;`
+      connection.query(getLastId,(error,res)=>{
+        if (error) throw error;
+          console.log(res[0].Roll_No)
+          const id=res[0].Roll_No
+          const enrollQuery=` insert into StudentToSubject(Roll_No,Subject_Id) select ${res[0].Roll_No},subject_id from subject;`
+          connection.query(enrollQuery,(error,res)=>{
+          console.log("enrolled to DB successfully");
+          })
+          // res.json(results)
+      })
+      res.send("sign up details sent to DB successfully");
+    }
+
+   
+    
+  })
+})
+
+//ENDPOINT FOR OVERALL ATTENDANCE PERCENT FETCHING for a particular student for each course
+/*
+OUTPUT RESPONSE SAMPLE FOR STUDENT WITH ROLL NUMBER 100
+[
+    {
+        "Subject_ID": "CCC708",
+        "Percentage": 0
+    },
+    {
+        "Subject_ID": "CSD101",
+        "Percentage": 33.3333
+    },
+    {
+        "Subject_ID": "CSD102",
+        "Percentage": 100
+    },
+    {
+        "Subject_ID": "CSD311",
+        "Percentage": 50
+    },
+    {
+        "Subject_ID": "MAT376",
+        "Percentage": 100
+    }
+]
+note that complete data has not been inserted so might not work with other roll numbers like
+all courses response wont be available
+*/
 app.get('/api/getAttendancePercent/:studentRollNum',(req,res)=>{
   //right now taking from params need to implement security by sending some token from firebase
   const studentRollNum = req.params.studentRollNum;
   const query=`
-  select Roll_no,Count(Distinct Date) as datesPresent,
-  SUM(CASE when PorA='P' then 1 else 0 end) as presentCount,(SUM(CASE when PorA='P' Then 1 else 0 end)/ COUNT(Distinct Date))*100 
-  as Percentage from attendance_details
-  where roll_no=${studentRollNum}
-  group by roll_no;
+  SELECT
+    ad.Subject_ID,
+    (SUM(CASE WHEN ad.PorA = 'P' THEN 1 ELSE 0 END) / COUNT(DISTINCT ad.Date)) * 100 AS Percentage
+    FROM attendance_details AS ad
+    WHERE ad.Roll_No = ${studentRollNum}
+    GROUP BY ad.Subject_ID;
   `
   connection.query(query,(error,results)=>{
     if (error) throw error;
