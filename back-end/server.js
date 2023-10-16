@@ -42,6 +42,23 @@ app.get('/api/getCourseList',(req,res)=>{
 });
 })
 
+//ENDPOINT FOR OVERALL ATTENDANCE PERCENT FETCHING for a particular student
+app.get('/api/getAttendancePercent/:studentRollNum',(req,res)=>{
+  //right now taking from params need to implement security by sending some token from firebase
+  const studentRollNum = req.params.studentRollNum;
+  const query=`
+  select Roll_no,Count(Distinct Date) as datesPresent,
+  SUM(CASE when PorA='P' then 1 else 0 end) as presentCount,(SUM(CASE when PorA='P' Then 1 else 0 end)/ COUNT(Distinct Date))*100 
+  as Percentage from attendance_details
+  where roll_no=${studentRollNum}
+  group by roll_no;
+  `
+  connection.query(query,(error,results)=>{
+    if (error) throw error;
+    res.json(results)
+  })
+})
+
 app.get('/api/getProfile/:studentID',(req,res)=>{
   //to get student details from student table
 
@@ -179,6 +196,8 @@ app.get('/api/getAttendance/:studentId',(req,res)=>{
 
 })
 
+
+app.get('/api/homePagedetails')
 
 
 app.listen(port,()=>{
