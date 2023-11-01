@@ -43,7 +43,7 @@ setState(() {
 
       // Update Firestore document with the image URL.
       await _firestore.collection('Users').doc(widget.user.uid).update({
-        'name': widget.user.displayName,
+       // 'name': widget.user.,
         'email': widget.user.email,
         'url': imageUrl,
       });
@@ -102,7 +102,7 @@ setState(() {
                     BorderRadius.circular(15),
 
                   ),
-                  child: Text('Capture and Upload Image')),
+                  child: Text('Capture and Upload Image',style: TextStyle(color: Colors.white),)),
             ),
           ],
         ),

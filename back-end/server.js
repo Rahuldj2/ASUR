@@ -1,7 +1,17 @@
 const express=require('express');
 const app=express();
 const mysql = require('mysql');
+
+const bodyParser = require('body-parser');
+
+// ...
+
+
+
+// Your routes go here
+
 const bodyParser=require('body-parser')
+
 
 
 const port=process.env.PORT || 3000;
@@ -14,9 +24,9 @@ KEEP DATABASE NAME AS asur
 
 
 
-const dbName="asur"
+const dbName="asur_copy1"
 const userName="root"
-const passw="RahulSQL2002"//change this when using on your local machine
+const passw="Arora@2412"//change this when using on your local machine
 
 
 app.use(bodyParser.json());
@@ -32,6 +42,8 @@ connection.connect(function(err) {
   console.log("Connected!");
 });
 
+
+app.use(bodyParser.json());
 app.get('/api/getCourseList',(req,res)=>{
   //to get the course list from the subject table
 

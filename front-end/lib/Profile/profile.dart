@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:Asur/Global_Vairables/background_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,6 +23,10 @@ class _ProfileState extends State<Profile> {
   String email="";
   CollectionReference usersCollection = FirebaseFirestore.instance.collection('Users');
   late FToast  flutterToast;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+  String imageUrl = 'your_image_url_here'; // Replace with the actual image URL
+  var downloadedImageData;
+
 
   @override
   void initState() {
@@ -91,7 +98,7 @@ class _ProfileState extends State<Profile> {
 
     try {
       String? uid = FirebaseAuth.instance.currentUser?.uid;
-
+ User? user = FirebaseAuth.instance.currentUser;
       if (uid != null) {
         DocumentSnapshot userDocument = await usersCollection.doc(uid).get();
 
@@ -102,7 +109,7 @@ class _ProfileState extends State<Profile> {
           name = data['name'];
           email = data['email'];
 
-
+ await _downloadImageFromStorage(user);
           print('Name: $name, Email: $email');
         } else {
           print('User document does not exist');
@@ -123,7 +130,47 @@ class _ProfileState extends State<Profile> {
     }
   }
 
+  Future<void> _downloadImageFromStorage(User? user) async {
+    try {
+      setState(() {
+        loading = true;
+      });
 
+
+
+
+      if(user!=null) {
+        Reference imageRef = _storage.ref().child('images').child(
+            '${user.uid}.jpg');
+        final Uint8List? imageData = await imageRef.getData();
+
+        if (imageData != null) {
+          setState(() {
+            downloadedImageData = imageData;
+            //img2 = Image.memory(downloadedImageData);
+            loading = false;
+          });
+          print('Image downloaded and stored in memory.');
+        } else {
+          setState(() {
+            loading = false;
+          });
+          print('Failed to download image.');
+        }
+      }
+    } catch (e) {
+      setState(() {
+        loading = false;
+      });
+      print('Error downloading image: $e');
+    }
+
+
+    if (downloadedImageData != null) {
+      Uint8List encodedImage = Uint8List.fromList(downloadedImageData);
+
+    }
+  }
 
   Future<void> logoutUser()async{
     await FirebaseAuth.instance.signOut().then((value) async {//delete uid from getstorage.
@@ -216,31 +263,42 @@ class _ProfileState extends State<Profile> {
 //           ),
 
 
-          Positioned(
+         loading?SizedBox.shrink():Positioned(
+           top: 40,
+           left: 110,
+           right: 110,
+           child: ClipOval(
+             child: Container(
+               width: 130,
+               height: 130,
+               decoration: const ShapeDecoration(
+                 color: Colors.white,
+                 shape: CircleBorder(
+                   side: BorderSide(
+                     width: 2.5,
+                     color: Color(0xFFE2E1FA),
+                     style: BorderStyle.solid,
+                   ),
+                 ),
+               ),
+               child: downloadedImageData != null
+                   ? Image.memory(Uint8List.fromList(downloadedImageData))
+                   : Image.asset('assets/without background logo.png'), // Replace with your placeholder image asset path
+             ),
+           ),
+         ),
 
-            top:40,
-            left: 110,
-            right: 110,
-            child: Container(
-              width: 130,
-              height: 130,
-              decoration: const ShapeDecoration(
-                color: Colors.white,
-                shape: CircleBorder(
-                  side: BorderSide(
-                    width: 2.5,
-                    color: Color(0xFFE2E1FA),
-                    style: BorderStyle.solid,
-                  ),
-                ),
-              ),
 
+
+          loading?  Center(
+          child: Container(
+            padding: EdgeInsets.only(
+                top: MediaQuery.of(context).size.height * 0.1),
+            child: const CircularProgressIndicator(
+                color:Colors.white
             ),
           ),
-
-
-
-          Positioned(
+        ):Positioned(
               top: 190,
               left: 70,
               right:70,
@@ -251,11 +309,11 @@ class _ProfileState extends State<Profile> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Aayush Arora",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w700,fontSize: 23),),
-                      SizedBox(height: MediaQuery.sizeOf(context).height*0.01,),
+                      Text(name,style: TextStyle(color: Colors.white,fontWeight: FontWeight.w800,fontSize: 26),),
+                      SizedBox(height: MediaQuery.sizeOf(context).height*0.03,),
                       Text('Computer Science and Engineering',style: TextStyle(color: Colors.white,fontWeight: FontWeight.w400,fontSize: 23),),
-                      SizedBox(height: MediaQuery.sizeOf(context).height*0.05,),
-                      Text('Payment Status',style: TextStyle(color: Colors.white ,fontWeight: FontWeight.w600,fontSize: 25),),
+                      SizedBox(height: MediaQuery.sizeOf(context).height*0.01,),
+                      Text('2025 Batch',style: TextStyle(color: Colors.white ,fontWeight: FontWeight.w600,fontSize: 23),),
                       SizedBox(height: MediaQuery.sizeOf(context).height*0.01,),
                       Text('Under Process',style: TextStyle(color: Colors.white,fontWeight: FontWeight.w400,fontSize: 23),),
                       SizedBox(height: MediaQuery.sizeOf(context).height*0.03,),

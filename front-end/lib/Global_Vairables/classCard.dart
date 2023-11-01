@@ -4,7 +4,7 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 
 class ClassCard extends StatefulWidget {
   final ClassModel classm;
-  final double atten_percent;
+  final num atten_percent;
 
   ClassCard({required this.classm, required this.atten_percent});
 
