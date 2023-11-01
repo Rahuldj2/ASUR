@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+
 import '../Global_Vairables/background_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -36,18 +37,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
 
 
-  Future<void> addStudent() async {
-name = _nameController.text;
-     email = _emailController.text;
 
-    final Uri uri = Uri.parse('http://your-api-url-here/addStudent');
-    final Map<String, String> data = {
-      'name': name,
-      'email': email,
+
+  Future<void> addStudent() async {
+    String fullName = _nameController.text;
+    List<String> nameParts = fullName.split(' ');
+
+    String firstName = nameParts.isNotEmpty ? nameParts[0] : '';
+    String lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+
+    String email = _emailController.text;
+    String dateStr = '2002-10-17'; // Replace with your date string
+    DateTime date = DateTime.parse(dateStr);
+    // Format the date as 'MM/dd/yyyy' (you can change the format as needed)
+ //   String formattedDate = DateFormat('MM/dd/yyyy').format(date);
+    final Uri uri = Uri.parse('http://10.6.9.160:3000/api/signUpDetails');
+    final Map<String, dynamic> data = {
+      'FirstName': firstName,  // Modify the keys to match the API's expected keys
+      'LastName': lastName,
+      'NetId': email, // Add the last name if needed
+      'DOB': '2002-10-17',        // Add the date of birth if needed
+    // Assuming NetId corresponds to the email
     };
 
     try {
-
       final response = await http.post(
         uri,
         headers: {
@@ -67,13 +80,14 @@ name = _nameController.text;
         }
       } else {
         // Handle the case where the server returned an error
-        print('Error: ${response.statusCode}');
+        print('Error at a: ${response.statusCode}');
       }
     } catch (e) {
       // Handle any other errors that may occur during the HTTP request
-      print('Error: $e');
+      print('Error at a: $e');
     }
   }
+
 
 // function to show toast message for verification link
   _showToast(String s) {
@@ -153,7 +167,7 @@ name = _nameController.text;
 
       // TODO: uncomment the  addStudent function for storing data in sql
 
-      //addStudent();
+      addStudent();
 
       // Navigate to the home screen or perform other actions
       return user;

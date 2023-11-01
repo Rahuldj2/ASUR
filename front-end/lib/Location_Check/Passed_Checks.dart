@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class LocationChecks extends StatefulWidget {
+
   const LocationChecks({super.key});
 
   @override

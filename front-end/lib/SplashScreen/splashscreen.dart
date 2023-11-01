@@ -1,4 +1,5 @@
 import 'package:Asur/Global_Vairables/background_screen.dart';
+import 'package:Asur/Navigator/bottom_navigation.dart';
 import 'package:Asur/Profile/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,13 +33,14 @@ class _SplashScreenState extends State<SplashScreen> {
     return isFirstTimeUser;
   }
   Future<void> _navigateToNextScreen() async {
+
     print("Navigating to next screen...");
     await Future.delayed(Duration(seconds: 5)); // Display splash screen for 2 seconds
     print("Navigating now!");
     if(await LogedIn()){
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => Profile()),
+        MaterialPageRoute(builder: (context) => BottomNavigation(0)),
       );
     }else {
       Navigator.pushReplacement(

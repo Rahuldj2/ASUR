@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:io';
+import 'package:Asur/Location_Check/StartChecks.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:Asur/Navigator/bottom_navigation.dart';
 import 'package:camera/camera.dart';
@@ -12,13 +13,18 @@ import 'package:flutter_face_api/face_api.dart' as Regula;
 import 'package:image_picker/image_picker.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FaceApp extends StatefulWidget {
+  final String coursecode;
+
+  FaceApp(this.coursecode);
+
   @override
   _FaceAppState createState() => _FaceAppState();
 }
 
-class _FaceAppState extends State<FaceApp> {
+class _FaceAppState extends State<FaceApp>{
 
   List<CameraDescription> cameras = [];
   late CameraDescription selectedCamera;
@@ -49,23 +55,27 @@ class _FaceAppState extends State<FaceApp> {
   final ImagePicker _picker = ImagePicker();
 
   bool loading = false;
+  bool checked = false;
   var image1 = new Regula.MatchFacesImage();
   var image2 = new Regula.MatchFacesImage();
   var img1 = Image.asset('assets/portrait.png');
   var img2 = Image.asset('assets/portrait.png');
   String _similarity = "nil";
-  late double similarper;
+  late double similarper=0;
   String _liveness = "nil";
   final FirebaseStorage _storage = FirebaseStorage.instance;
   String imageUrl = 'your_image_url_here'; // Replace with the actual image URL
   var downloadedImageData;
 
+
   @override
   void initState() {
     super.initState();
+
     initPlatformState();
     _downloadImageFromStorage();
     initCamera();
+
     const EventChannel('flutter_face_api/event/video_encoder_completion')
         .receiveBroadcastStream()
         .listen((event) {
@@ -123,43 +133,44 @@ class _FaceAppState extends State<FaceApp> {
 
 
 
-  showAlertDialog(BuildContext context, bool first, [downloadedImage]) =>
-      showDialog(
-          context: context,
-          builder: (BuildContext context) =>
-              AlertDialog(title: Text("Select option"), actions: [
-                TextButton(
-                    child: Text("Database"),
-                    onPressed: () async {
-                      if (downloadedImage != null) {
-                        Uint8List encodedImage = Uint8List.fromList(
-                            downloadedImage);
-                        setImage(
-                            first,
-                            encodedImage,
-                            Regula.ImageType.PRINTED);
-                      }
-                      Navigator.of(context).pop(); // Close the dialog
-                    }),
-                // ignore: deprecated_member_use
-                TextButton(
-                    child: Text("Use camera"),
-                    onPressed: () async {
-                      // Use image_picker to capture an image
-                      final XFile? capturedImage = await _picker.pickImage(
-                          source: ImageSource.camera);
+  showAlertDialog(BuildContext context, bool first, [downloadedImage])
 
-                      if (capturedImage != null) {
-                        // Load the captured image and set it
-                        Uint8List imageBytes = await capturedImage
-                            .readAsBytes();
-                        setImage(first, imageBytes, Regula.ImageType.LIVE);
-                      }
 
-                      Navigator.pop(context);
-                    }
-                )
-              ]));
+
+
+  async {
+
+  Regula.FaceSDK.startLiveness().then((value) {
+      var result = Regula.LivenessResponse.fromJson(json.decode(value));
+      if (result!.bitmap == null) return;
+      setImage(true, base64Decode(result.bitmap!.replaceAll("\n", "")),
+          Regula.ImageType.LIVE);
+
+    });
+
+
+
+
+   // Navigator.pop(context);
+
+
+
+
+    // Use image_picker to capture an image
+    // final XFile? capturedImage = await _picker.pickImage(
+    //     source: ImageSource.camera);
+    //
+    // if (capturedImage != null) {
+    //   // Load the captured image and set it
+    //   Uint8List imageBytes = await capturedImage
+    //       .readAsBytes();
+    //   setImage(first, imageBytes, Regula.ImageType.LIVE);
+    // }
+
+
+  }
+
+
 
   setImage(bool first, Uint8List? imageFile, int type) {
     if (imageFile == null) {
@@ -171,13 +182,13 @@ class _FaceAppState extends State<FaceApp> {
       image1.bitmap = base64Encode(imageFile);
       image1.imageType = type;
       setState(() {
-        img1 = Image.memory(imageFile);
+
         _liveness = "nil";
       });
     } else {
       image2.bitmap = base64Encode(imageFile);
       image2.imageType = type;
-      setState(() => img2 = Image.memory(imageFile));
+
     }
   }
 
@@ -199,7 +210,7 @@ class _FaceAppState extends State<FaceApp> {
 
       if(user!=null) {
         Reference imageRef = _storage.ref().child('images').child(
-           '${user.uid}.jpg');
+            '${user.uid}.jpg');
         final Uint8List? imageData = await imageRef.getData();
 
         if (imageData != null) {
@@ -251,12 +262,15 @@ class _FaceAppState extends State<FaceApp> {
         image2.bitmap == null ||
         image2.bitmap == "") {
       print('images  are null');
+      setState(() {
+        loading= false;
+      });
       return;
     }
     setState(() {
       loading = true;
     });
-    setState(() => _similarity = "Processing...");
+    // setState(() => _similarity = "Processing...");
     var request = new Regula.MatchFacesRequest();
     request.images = [image1, image2];
     Regula.FaceSDK.matchFaces(jsonEncode(request)).then((value) {
@@ -269,20 +283,53 @@ class _FaceAppState extends State<FaceApp> {
         setState(() {
           similarper = split!.matchedFaces.length > 0
               ? (split.matchedFaces[0]!.similarity! * 100) : 0;
+          loading = false;
+          print('similar per ${similarper.toString()}');
 
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ResultAnimation(similarper>98?true:false),
+            ),
+          );
 
-          _similarity = split!.matchedFaces.length > 0
-              ? ((split.matchedFaces[0]!.similarity! * 100).toStringAsFixed(2) +
-              "%")
-              : "error";
-
-          loading= false;
-
+          // After 4 seconds, pop out of the ResultAnimation screen
+          Future.delayed(Duration(seconds: 4), () {
+            Navigator.pop(context);
+            if(similarper>98) {
+              saveData("FaceMatch", true);
+              saveDatastring("liveClass", widget.coursecode);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => StartChecks(),
+                ),
+              );
+            }else{
+              saveData("FaceMatch", false);
+            }
+          });
         });
+
 
       });
     });
+    checked= true;
+    // After successful matching
+
+
+
   }
+
+  Future<void> saveData(String key, bool match) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, match);
+  }
+  Future<void> saveDatastring(String key, String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(key, value);
+  }
+
 
 
   Widget createButton(String text, VoidCallback onPress) =>
@@ -314,60 +361,201 @@ class _FaceAppState extends State<FaceApp> {
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
-    return  Scaffold(
-        body: loading ? Center(
-          child: Container(
-            padding: EdgeInsets.only(
-                top: MediaQuery
-                    .of(context)
-                    .size
-                    .height * 0.1),
-            child: const CircularProgressIndicator(
-              color: Color.fromARGB(255, 8, 23, 120),
-            ),
+    return Scaffold(
+      body: loading
+          ? Center(
+        child: Container(
+          padding: EdgeInsets.only(
+              top: MediaQuery.of(context).size.height * 0.1),
+          child: const CircularProgressIndicator(
+            color: Color.fromARGB(255, 8, 23, 120),
           ),
-        ) : Container(
-            margin: EdgeInsets.fromLTRB(0, 0, 0, 100),
-            width: double.infinity,
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  createImage(img2.image, () =>
-                      showAlertDialog(context, false, downloadedImageData)),
-                  createImage(img1.image, () => showAlertDialog(context, true)),
-
-
-                  Container(margin: EdgeInsets.fromLTRB(0, 0, 0, 15)),
-SizedBox(height: 34,),
-                  InkWell(
-                      onTap: () {
-                        matchFaces();
-
-                        if(similarper>98){
-                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => BottomNavigation(1)));
-                        }
-                      },
-                      child: Container(
-                          height: height * 0.05,
-                          width: width * 0.55,
-                          decoration: BoxDecoration(
-                            color: Colors.black,
-
-                            borderRadius:
-                            BorderRadius.circular(15),
-
-                          ),
-                          child: Center(child: Text("Authenticate",style: TextStyle(color: Colors.white),)))
+        ),
+      )
+          :
+      Container(
+        margin: EdgeInsets.fromLTRB(0, 0, 0, 100),
+        width: double.infinity,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            InkWell(
+              onTap: () {
+                showAlertDialog(context, true);
+              },
+              child: Container(
+                height: height * 0.05,
+                width: width * 0.55,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Center(
+                  child: Text(
+                    "Capture Image",
+                    style: TextStyle(color: Colors.white),
                   ),
+                ),
+              ),
+            ),
+            SizedBox(height: 34),
+            InkWell(
+              onTap: () async {
+                // Show circular progress indicator
+                setState(() {
+                  loading = true;
+                });
 
-SizedBox(height: 22,),
-                  Center(
-                    child: Container(
+                // Perform the matchFaces operation
+                matchFaces();
 
-                        child: Text("Similarity: " + _similarity,
-                            style: TextStyle(fontSize: 18))),
-                  )
-                ])),
-      );
+                // Delay to simulate processing time
+               // await Future.delayed(Duration(seconds: 2));
+
+                // Hide circular progress indicator
+
+
+
+
+                if (similarper > 98) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BottomNavigation(1),
+                    ),
+                  );
+                }
+              },
+              child: Container(
+                height: height * 0.05,
+                width: width * 0.55,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Center(
+                  child: Text(
+                    "Authenticate",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 22),
+            SizedBox(height: 16), // Add some spacing
+
+            // Wrap the content in a Visibility widget
+
+
+            // Circular progress indicator
+            if (loading)
+              CircularProgressIndicator(
+                value: null,
+                strokeWidth: 6,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+              ),
+
+            // Animated tick or cross based on similarity
+
+
+
+          ],
+        ),
+      ),
+    );
+  }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+class ResultAnimation extends StatefulWidget {
+  final bool isSuccessful; // Indicates whether the animation should show success or failure
+
+  ResultAnimation(this.isSuccessful);
+
+  @override
+  _ResultAnimationState createState() => _ResultAnimationState();
+}
+
+class _ResultAnimationState extends State<ResultAnimation> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _opacityAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Create and start the animation controller
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 550),
+    )..forward();
+
+    // Create an opacity animation tween
+    _opacityAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(_controller);
+
+    // Add a listener to restart the animation when it completes
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _controller.reverse();
+      } else if (status == AnimationStatus.dismissed) {
+        _controller.forward();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedBuilder(
+              animation: _opacityAnimation,
+              builder: (context, child) {
+                return Opacity(
+                  opacity: _opacityAnimation.value,
+                  child: Icon(
+                    widget.isSuccessful
+                        ? Icons.check_circle // Green tick
+                        : Icons.cancel, // Red cross
+                    color: widget.isSuccessful ? Colors.green : Colors.red,
+                    size: 100.0,
+                  ),
+                );
+              },
+            ),
+            SizedBox(height: 4,),
+            Text(
+              widget.isSuccessful ? "Authenticated" : "Not Authorized",
+              style: TextStyle(
+                color: widget.isSuccessful ? Colors.green : Colors.red,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 }
