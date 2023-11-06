@@ -6,6 +6,7 @@ import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 class StartChecks extends StatefulWidget {
   const StartChecks({Key? key}) : super(key: key);
 
@@ -20,11 +21,11 @@ class _StartChecksState extends State<StartChecks> {
   @override
   void initState() {
     super.initState();
-  _initBackgroundService();
+    _initBackgroundService();
   }
 
   Future<void> _initBackgroundService() async {
-await Permission.location.request();
+    await Permission.location.request();
     Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
@@ -36,11 +37,11 @@ await Permission.location.request();
 
   Future<int> loadData(String key) async {
     final prefs = await SharedPreferences.getInstance();
-    int a  = prefs.getInt(key) ?? 0;
+    int a = prefs.getInt(key) ?? 0;
     return a;
   }
 
-  Future<void> _stopService() async{
+  Future<void> _stopService() async {
     final service = FlutterBackgroundService();
     final isRunning = await service.isRunning();
     if (isRunning) {
@@ -48,7 +49,7 @@ await Permission.location.request();
       saveDatab("FaceMatch", false);
       text = 'Class finished';
     }
-    }
+  }
 
   Future<void> _startOrStopService() async {
     final service = FlutterBackgroundService();
@@ -74,6 +75,7 @@ await Permission.location.request();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(key, value);
   }
+
   Future<void> saveDatab(String key, bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(key, value);
@@ -82,54 +84,49 @@ await Permission.location.request();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     appBar: AppBar(
+      appBar: AppBar(
         backgroundColor: Color(0xff912C2E),
-    title: Row(
-      children: [
-        IconButton(
-            icon: Icon(
-              Icons.arrow_back,
-              size: 26,
+        title: Row(
+          children: [
+
+            SizedBox(
+              width: 13,
             ),
-            onPressed: () {
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=>BottomNavigation(0)));
-            }),
-        SizedBox(width: 13,),
-        const Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-        Text(
-        "ASUR",
-        style: TextStyle(
-        fontSize: 19,
-        fontWeight: FontWeight.bold,
+            const Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "ASUR",
+                  style: TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  "Start  your checks",
+                  style: TextStyle(
+                    fontSize: 13,
+                  ),
+                )
+              ],
+            ),
+          ],
         ),
-        ),
-        Text(
-        "Start  your checks",
-        style: TextStyle(
-        fontSize: 13,
-        ),
-        )
+        actions: [
+          IconButton(
+              icon: Icon(
+                Icons.search,
+                size: 26,
+              ),
+              onPressed: () {}),
         ],
-        ),
-      ],
-    ),
-    actions: [
-    IconButton(
-    icon: Icon(
-    Icons.search,
-    size: 26,
-    ),
-    onPressed: () {}),
-    ],
-    ),
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-           Image.asset("assets/startchecks.jpg"),
+            Image.asset("assets/startchecks.jpg"),
             // ElevatedButton(
             //   onPressed: () async {
             //   _initBackgroundService();
@@ -153,10 +150,13 @@ await Permission.location.request();
             // ),
             SizedBox(height: 10),
             Text("Start Service , Sit Back and Study "),
-            SizedBox(height: 10,),
+            SizedBox(
+              height: 10,
+            ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xff912C2E), // Change this color to the desired background color
+                backgroundColor: Color(
+                    0xff912C2E), // Change this color to the desired background color
               ),
               onPressed: () async {
                 _startOrStopService();
@@ -166,7 +166,7 @@ await Permission.location.request();
             SizedBox(height: 10),
             StreamBuilder<Map<String, dynamic>?>(
               stream: FlutterBackgroundService().on('update'),
-              builder: (context, snapshot)  {
+              builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return const Center(
                     child: CircularProgressIndicator(),
@@ -176,21 +176,22 @@ await Permission.location.request();
                 final data = snapshot.data!;
 
                 int? times = data["actionper"];
-                bool live =  data["classliveornot"];
-                if(live){
-                  _stopService().then((_) {
+                bool live = data["classliveornot"];
+                if (!live) {
+                  _stopService().then((_) async {
                     // Code to execute after _stopService has completed.
+
+                    SharedPreferences prefs = await SharedPreferences.getInstance();
+                    prefs.remove('currlive');
                   });
                 }
                 return Column(
                   children: [
-
                     Text('performed ${times.toString()} times'),
                   ],
                 );
               },
             ),
-
           ],
         ),
       ),

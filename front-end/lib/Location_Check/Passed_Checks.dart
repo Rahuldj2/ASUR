@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class LocationChecks extends StatefulWidget {
-
   const LocationChecks({super.key});
 
   @override
@@ -9,17 +8,15 @@ class LocationChecks extends StatefulWidget {
 }
 
 class _LocationChecksState extends State<LocationChecks> {
-  int inside=0;
-  int checksdone=0;
-bool live = false;
+  int inside = 0;
+  int checksdone = 0;
+  bool live = false;
   String noclass = 'No class live now come back later';
-  late String passedc ;
+  late String passedc;
 
-  void init(){
+  void init() {
     passedc = "Inside of class ${inside.toString()} / ${checksdone.toString()}";
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -57,19 +54,17 @@ bool live = false;
         ],
       ),
       body: Container(
-        height: height*0.88,
-
+        height: height * 0.88,
         child: Center(
           child: Container(
-            height: height*0.4,
-            width: width*0.8,
+            height: height * 0.4,
+            width: width * 0.8,
             decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(22)
-            ),
+                color: Colors.black, borderRadius: BorderRadius.circular(22)),
             child: Center(
               child: Text(
-live?passedc:noclass,style: TextStyle(color: Colors.white,fontSize: 19),
+                live ? passedc : noclass,
+                style: TextStyle(color: Colors.white, fontSize: 19),
               ),
             ),
           ),

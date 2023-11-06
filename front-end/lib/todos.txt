@@ -1,18 +1,19 @@
-homepage is done data for particular roll number has to be added  aabhi roll number =100 hard coded hai
-get the roll number from email and then do the things -- done
 
- 2. two classes cannot be live at the same time
- 3.     need a end point which just returns  if class is live or not and takes input as coursecode-- done
 
- 4. design   for when checks are going on
+remove search button from app bar  and double back arrow from startchecks app bar
+attendace details should be added when user signs up
 
  5. periodic time doing foreground activity
 
  6. get data for class details in main.dart (lat long and center from the api)
-
- 7. refresh bar for homepage----------done
-
  8. convert num to 1 decimal
-
  9. add data in class room details table for all the five courses
  10. add attendance details for smb@gmail.com
+
+ change the api of homepage
+ toogle issue on website class live
+
+end point  which receives course code and date and roll number and sends present or absent
+
+
+

@@ -70,7 +70,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '653677327927',
     projectId: 'asur-snu',
     storageBucket: 'asur-snu.appspot.com',
-    iosClientId: '653677327927-45fglu294vl1t06pkforp48qt1ht086h.apps.googleusercontent.com',
+    iosClientId:
+        '653677327927-45fglu294vl1t06pkforp48qt1ht086h.apps.googleusercontent.com',
     iosBundleId: 'com.example.asur',
   );
 }
