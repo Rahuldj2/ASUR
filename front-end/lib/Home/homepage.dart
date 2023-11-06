@@ -20,14 +20,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<ClassModel> classes = [
-
-  ];
-  CollectionReference usersCollection = FirebaseFirestore.instance.collection('Users');
-bool loading = false;
-bool facematch = false;
-  String email="";
-  String Rollno ="";
+  List<ClassModel> classes = [];
+  CollectionReference usersCollection =
+      FirebaseFirestore.instance.collection('Users');
+  bool loading = false;
+  bool facematch = false;
+  String email = "";
+  String Rollno = "";
   @override
   void initState() {
     super.initState();
@@ -37,13 +36,14 @@ bool facematch = false;
     fetchData();
     fetchUserEmail();
 
- loadData("FaceMatch");
+    loadData("FaceMatch");
     // Call the function to fetch data from the API when the widget is created.
   }
 
   // FETCHING ENROLLED COURSES DATA
   Future<void> fetchData() async {
-    final response = await http.get(Uri.parse('https://asur-ams.vercel.app/api/GetCourseList'));
+    final response = await http
+        .get(Uri.parse('https://asur-ams.vercel.app/api/GetCourseList'));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
@@ -51,7 +51,7 @@ bool facematch = false;
         return ClassModel(
           item['Subject_ID'],
           item['TeacherName'],
-          item['LIVE'] == 'L',
+          item['LIVE'] == 'L'
         );
       }).toList();
 
@@ -67,23 +67,22 @@ bool facematch = false;
     }
   }
 
-  List<AttendanceModel> attenper =[];
+  List<AttendanceModel> attenper = [];
   // attendance percentage for particular student for sunjects
   Future<void> fetchAttendance(String rollNo) async {
-
     final String url = 'https://asur-ams.vercel.app/api/GetAttendancePercent';
 
     try {
       final response = await http.get(Uri.parse('$url?rollNo=$Rollno'));
 
       if (response.statusCode == 200) {
-     //   final data = json.decode(response.body);
+        //   final data = json.decode(response.body);
         // Process the data as needed
         final List<dynamic> data = json.decode(response.body);
         final List<AttendanceModel> fetchedClasses = data.map((item) {
           return AttendanceModel(
-            subjectID:  item['Subject_ID'],
-            percentage:  item['Percentage'],
+            subjectID: item['Subject_ID'],
+            percentage: item['Percentage'],
           );
         }).toList();
         setState(() {
@@ -99,10 +98,8 @@ bool facematch = false;
     }
   }
 
-
   // get roll number from email
   Future<void> fetchRollNo(String email) async {
-
     final String url = 'https://asur-ams.vercel.app/api/GetRollNumFromEmail';
 
     try {
@@ -114,11 +111,15 @@ bool facematch = false;
         // Process the data as needed
         final List<dynamic> data = json.decode(response.body);
         if (data.isNotEmpty) {
-          final int rollNoValue = data[0]['roll_no']; // Access the first item in the list
+          final int rollNoValue =
+              data[0]['roll_no']; // Access the first item in the list
           setState(() {
+
             Rollno = rollNoValue.toString();
             print('roll number $Rollno');
+
           });
+         await saveData("RollNo", Rollno);
         }
 
         //   print(attenper.toString());
@@ -129,16 +130,16 @@ bool facematch = false;
       print('Error fetching data2: $error');
     }
   }
+
 // MATCHING COURSE CODE WITH CORRESPONDING ATTENDANCE
-num matchdata (String coursecode){
-    for(int i=0;i<attenper.length;i++){
-      if(attenper[i].subjectID==coursecode){
+  num matchdata(String coursecode) {
+    for (int i = 0; i < attenper.length; i++) {
+      if (attenper[i].subjectID == coursecode) {
         return attenper[i].percentage;
       }
     }
     return 70;
-}
-
+  }
 
 // FETCH DATA FROM FIREBASE
 
@@ -154,17 +155,17 @@ num matchdata (String coursecode){
         DocumentSnapshot userDocument = await usersCollection.doc(uid).get();
 
         if (userDocument.exists) {
-          Map<String, dynamic> data = userDocument.data() as Map<String, dynamic>;
+          Map<String, dynamic> data =
+              userDocument.data() as Map<String, dynamic>;
 
           // Process data as needed
 
           email = data['email'];
 
-
           print(' Email: $email');
-          email = email.substring(0, email.length - 3);
-        await  fetchRollNo(email);
-     await     fetchAttendance(Rollno);
+
+          await fetchRollNo(email);
+          await fetchAttendance(Rollno);
         } else {
           print('User document does not exist');
         }
@@ -184,120 +185,115 @@ num matchdata (String coursecode){
     }
   }
 
-
-
-
-
-
-
   Future<void> loadData(String key) async {
     final prefs = await SharedPreferences.getInstance();
-facematch = prefs.getBool(key) ??false;
+    facematch = prefs.getBool(key) ?? false;
     print('face $facematch');
   }
+
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(0xff912C2E),
-        title: const Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "ASUR",
-              style: TextStyle(
-                fontSize: 19,
-                fontWeight: FontWeight.bold,
+        appBar: AppBar(
+          backgroundColor: Color(0xff912C2E),
+          title: const Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "ASUR",
+                style: TextStyle(
+                  fontSize: 19,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            Text(
-              "see your attendance",
-              style: TextStyle(
-                fontSize: 13,
-              ),
-            )
+              Text(
+                "see your attendance",
+                style: TextStyle(
+                  fontSize: 13,
+                ),
+              )
+            ],
+          ),
+          actions: [
+            IconButton(
+                icon: Icon(
+                  Icons.search,
+                  size: 26,
+                ),
+                onPressed: () {}),
           ],
         ),
-        actions: [
-          IconButton(
-              icon: Icon(
-                Icons.search,
-                size: 26,
-              ),
-              onPressed: () {}),
-        ],
-      ),
-
         body: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Center(
-            child:loading?  Center(
-              child: Container(
-                padding: EdgeInsets.only(
-                    top: MediaQuery.of(context).size.height * 0.1),
-                child: const CircularProgressIndicator(
-                    color: Color(0xff912C2E)
-                ),
-              ),
-            ): RefreshIndicator(
-              onRefresh: () async{
+            child: loading
+                ? Center(
+                    child: Container(
+                      padding: EdgeInsets.only(
+                          top: MediaQuery.of(context).size.height * 0.1),
+                      child: const CircularProgressIndicator(
+                          color: Color(0xff912C2E)),
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: () async {
+                      setState(() {
+                        loading = true;
+                      });
+                      await fetchData();
+                      await fetchUserEmail();
 
-                setState(() {
-                  loading = true;
-                });
-            await    fetchData();
-             await   fetchUserEmail();
-
-            await    loadData("FaceMatch");
-              },
-              child: Container(
-                height: height*0.8,
-                width: width*0.88,
-                child: ListView.builder(
-
-                    itemCount: classes.length,
-                    itemBuilder: (context, index) {
-
-                      return Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: InkWell(
-                          onTap: () {
-if(classes[index].live&&facematch==false){
+                      await loadData("FaceMatch");
+                    },
+                    child: Container(
+                      height: height * 0.8,
+                      width: width * 0.88,
+                      child: ListView.builder(
+                          itemCount: classes.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: EdgeInsets.symmetric(vertical: 8.0),
+                              child: InkWell(
+                                onTap: () {
+                                  if (classes[index].live &&
+                                      facematch == false) {
 // open the face recognition
 //saveData("liveClass", classes[index].courseCode);
-Navigator.push(context, MaterialPageRoute(builder: (_) => FaceApp(classes[index].courseCode)));
-}
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (_) => FaceApp(
+                                                classes[index].courseCode)));
+                                  }
 // if face matching has already been done
-                            if(classes[index].live&&facematch){
+                                  if (classes[index].live && facematch) {
 // open the face recognition
 
-                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => StartChecks()));
-                            }
-                          },
-
-                          child: ClassCard(
-                          atten_percent: matchdata(classes[index].courseCode) ,
-                            classm: classes[index],
-
-                          ),
-                        ),
-                      );
-                    }),
-              ),
-            ),
+                                    Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (_) => StartChecks()));
+                                  }
+                                },
+                                child: ClassCard(
+                                  atten_percent:
+                                      matchdata(classes[index].courseCode),
+                                  classm: classes[index],
+                                ),
+                              ),
+                            );
+                          }),
+                    ),
+                  ),
           ),
-        )
-
-
-    );
+        ));
   }
 
   Future<void> saveData(String key, String value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(key, value);
   }
-
 }
