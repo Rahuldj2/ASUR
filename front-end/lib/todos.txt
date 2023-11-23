@@ -1,19 +1,10 @@
+set back the original duration 80 seconds in main.dart
 
+do something for if someone is on face scanning screen and he/she is not looking at phone for more than 10 seconds, then it should go back to main screen automatically
 
-remove search button from app bar  and double back arrow from startchecks app bar
-attendace details should be added when user signs up
+change navigation and ressult screen of secondauth.dart when someone clicks on authenticate.
 
- 5. periodic time doing foreground activity
+ask permission for notification
 
- 6. get data for class details in main.dart (lat long and center from the api)
- 8. convert num to 1 decimal
- 9. add data in class room details table for all the five courses
- 10. add attendance details for smb@gmail.com
-
- change the api of homepage
- toogle issue on website class live
-
-end point  which receives course code and date and roll number and sends present or absent
-
-
-
+send  a parameter in result screen of secondauth.dart to main.dart
+change notification timer  and screen timer to 60 seconds
