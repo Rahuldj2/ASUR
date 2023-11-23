@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'dart:math';
 import 'dart:ui';
+import 'package:Asur/Face_Auth/second_face_auth.dart';
 import 'package:Asur/Location_Check/StartChecks.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -20,9 +22,11 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
+import 'Face_Auth/faceDetection.dart';
 import 'Models/LiveClassmode.dart';
 import 'firebase_options.dart';
-
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+FlutterLocalNotificationsPlugin notificationsPlugin = FlutterLocalNotificationsPlugin();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 //  SystemChrome.setEnabledSystemUIMode(SystemUiMode.t);
@@ -34,9 +38,51 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await initializeService();
+
+
+  AndroidInitializationSettings androidSettings = AndroidInitializationSettings("@mipmap/splash");
+
+  DarwinInitializationSettings iosSettings = DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestCriticalPermission: true,
+      requestSoundPermission: true
+  );
+
+  InitializationSettings initializationSettings = InitializationSettings(
+      android: androidSettings,
+      iOS: iosSettings
+  );
+
+  bool? initialized = await notificationsPlugin.initialize(
+    initializationSettings,
+
+    onDidReceiveNotificationResponse: (response) {
+      print('here');
+      print(response.payload.toString());
+      onSelectNotification(response.payload);
+
+
+    },
+
+
+
+
+  );
+
   runApp(const MyApp());
 }
-
+Future<void> onSelectNotification(String? payload) async {
+  String? screenToOpen = payload;
+  if (screenToOpen != null) {
+    if (screenToOpen == 'faceApp') {
+      print('down');
+      navigatorKey.currentState?.pushReplacement(MaterialPageRoute(builder: (_) => SecondFaceAuth("CSD203")));
+    } else if (screenToOpen == 'otherScreen') {
+      // Handle other screens if needed
+    }
+  }
+}
 //-------------------------------------------------------FLUTTER BACKGROUND SERVICES CODE------------------------------//
 String email = "";
 String Rollno = "";
@@ -209,7 +255,8 @@ Future<void> saveData(String key, int value) async {
 
 Future<int> loadData(String key) async {
   final prefs = await SharedPreferences.getInstance();
- int a = prefs.getInt(key)?.toInt() ?? 0;
+  int? a = prefs.getInt(key) ?? 0;
+
   return a;
 }
 
@@ -308,6 +355,7 @@ Future<void> getClassRoomDetailsFromLocalStorage() async {
     alititude = liveClass.altitude;
   }
 }
+bool atm = false;
 // MARK SOME PRESENT
 Future<void> markAttendance(String coursecode,String attendanceStatus) async {
 
@@ -324,15 +372,18 @@ Future<void> markAttendance(String coursecode,String attendanceStatus) async {
       Uri.parse(url),
       body: {
         'stud_id': stud_id.toString(),
-        'course_id': course_id,
-        'date': date.toString(),
-        'attendance_status': attendance_status,
+        'course_id': "$course_id",
+        'date': "${date.toString()}",
+        'attendance_status': "$attendance_status",
       },
     );
 
     if (response.statusCode == 200) {
       // Attendance marked successfully
       print('Attendance marked successfully');
+
+
+      atm= true;
     } else {
       // Error marking attendance
       print('Error marking attendance ${response.statusCode}');
@@ -347,7 +398,10 @@ Future<void> markAttendance(String coursecode,String attendanceStatus) async {
 
 
 
-
+Future<void> saveDatab(String key, bool value) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool(key, value);
+}
 
 Future<void> initializeService() async {
   final service = FlutterBackgroundService();
@@ -379,7 +433,7 @@ void onStart(ServiceInstance service) async {
     service.stopSelf();
   });
 
-  Timer.periodic(const Duration(seconds: 80), (timer) async {
+  Timer.periodic(const Duration(seconds: 10), (timer) async {
 
 
     if (service is AndroidServiceInstance) {
@@ -410,7 +464,7 @@ void onStart(ServiceInstance service) async {
         print('error in location smmothng $e');
       }
       print('delay started');
-      await Future.delayed(Duration(seconds: 60));
+     await Future.delayed(Duration(seconds: 5));//55
       print('delay ended');
       _locationSubscription?.cancel();
       _countdownTimer?.cancel(); // Cancel the countdown timer manually
@@ -437,38 +491,44 @@ void onStart(ServiceInstance service) async {
         }
       });
 
+
+
       service.invoke(
         'update',
         {
           "actionper": s,
-          "classliveornot": cl
+          "classliveornot": cl,
+          "atm ":atm
           // this returns weather class is live or not (fetch this in startcheks file0
         },
       );
 
     } else {
 
-     int fininside = await loadData('LocationChecks');
-     print('final inside $fininside');
-      Rollno=  await loadDataString("RollNo");
-     if(fininside>=2){
-       String courseCode = await loadDataString("currlive");
-       print('Marking the user present');
-        markAttendance(courseCode, 'P');
-       saveData('LocationChecks', 0);
-     }else{
-       String courseCode = await loadDataString("currlive");
-       print('Marking the user absent');
-     await   markAttendance(courseCode, 'A');
-
-       saveData('LocationChecks', 0);
-       saveData('performedaction', 0);
-     }
+   //  int fininside = await loadData('LocationChecks');
+   //  print('final inside $fininside');
+   //   Rollno=  await loadDataString("RollNo");
+     // if(fininside>=2){
+     //   // String courseCode = await loadDataString("currlive");
+     //   // print('Marking the user present');
+     //   //  markAttendance(courseCode, 'P');
+     //   // print('attendance marked');
+     //
+     // }else{
+     //   String courseCode = await loadDataString("currlive");
+     //   print('Marking the user absent');
+     // await   markAttendance(courseCode, 'A');
+     //   print('attendance marked');
+     //
+     //
+     // }
+     saveData('performedaction', 0);
      service.invoke(
        'update',
        {
 
-         "classliveornot": cl
+         "classliveornot": cl,
+         "atm":atm
 
        },
      );
@@ -525,6 +585,7 @@ class MyApp extends StatelessWidget {
       future: requestPermissions(),
       builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
         return MaterialApp(
+          navigatorKey: navigatorKey,
           theme: ThemeData(
             primaryColor: Color(0xff912C2E),
             hintColor: Color(0xff912C2E),

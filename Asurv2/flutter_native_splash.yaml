@@ -1,0 +1,7 @@
+flutter_native_splash:
+  color: "#080303" # Use a transparent background color
+  splash_screen_duration: 10
+  image: "assets/without background logo.png" # Path to your custom splash image
+  image_dark: "assets/without background logo.png" # Path to your custom splash image for dark mode
+  fill: true # Resize the image to fill the screen (true) or keep aspect ratio (false)
+  fit: BoxFit.cover # BoxFit for image resizing (cover to fill the screen)

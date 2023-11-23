@@ -1,7 +1,10 @@
+import 'package:Asur/Face_Auth/faceDetection.dart';
+import 'package:Asur/Face_Auth/second_face_auth.dart';
 import 'package:Asur/Navigator/bottom_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:Asur/main.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -16,6 +19,7 @@ class StartChecks extends StatefulWidget {
 
 class _StartChecksState extends State<StartChecks> {
   String text = "Start Service";
+  String attt = "att not marked";
   int sk = 0;
 
   @override
@@ -42,6 +46,7 @@ class _StartChecksState extends State<StartChecks> {
   }
 
   Future<void> _stopService() async {
+   // await  Future.delayed(Duration(seconds: 15));
     final service = FlutterBackgroundService();
     final isRunning = await service.isRunning();
     if (isRunning) {
@@ -80,6 +85,55 @@ class _StartChecksState extends State<StartChecks> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(key, value);
   }
+
+
+
+  Future<void>showNotification() async {
+    AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      "notifications-youtube",
+      "YouTube Notifications",
+      priority: Priority.max,
+      importance: Importance.max,
+    );
+
+    DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    NotificationDetails notiDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    // Show the initial notification
+
+
+    // Start the timer for 60 seconds
+    int timerSeconds = 5;
+    while (timerSeconds > 0) {
+      // Update the notification every second with the remaining time
+      await Future.delayed(Duration(seconds: 1));
+      timerSeconds--;
+
+      // Update the notification content with the remaining time
+      if(timerSeconds >0){
+        await notificationsPlugin.show(
+          1,
+          "test",
+          "Time remaining: $timerSeconds seconds",
+          notiDetails,
+          payload: "faceApp",
+        );
+      }
+
+    }
+
+    // Cancel the notification after the timer ends
+    await notificationsPlugin.cancel(1);
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -127,27 +181,7 @@ class _StartChecksState extends State<StartChecks> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset("assets/startchecks.jpg"),
-            // ElevatedButton(
-            //   onPressed: () async {
-            //   _initBackgroundService();
-            //     setState(() {});
-            //   },
-            //   child: Text('Check Times'),
-            // ),
-            // SizedBox(height: 10),
-            // ElevatedButton(
-            //   onPressed: () async {
-            //     FlutterBackgroundService().invoke("setAsForeground");
-            //   },
-            //   child: Text('Set as Foreground'),
-            // ),
-            // SizedBox(height: 10),
-            // ElevatedButton(
-            //   onPressed: () async {
-            //     FlutterBackgroundService().invoke("setAsBackground");
-            //   },
-            //   child: Text('Set as Background'),
-            // ),
+
             SizedBox(height: 10),
             Text("Start Service , Sit Back and Study "),
             SizedBox(
@@ -174,24 +208,39 @@ class _StartChecksState extends State<StartChecks> {
                 }
 
                 final data = snapshot.data!;
-
-                int? times = data["actionper"];
+                int? times = data["actionper"] ?? 0;
                 bool live = data["classliveornot"];
-                if (!live) {
-                  _stopService().then((_) async {
-                    // Code to execute after _stopService has completed.
+                bool atm = data?["atm"] ?? false;
 
-                    SharedPreferences prefs = await SharedPreferences.getInstance();
-                    prefs.remove('currlive');
-                  });
+
+
+                if (!live) {
+                  // Schedule a setState call after the build has completed
+
+                    _stopService().then((_) async {
+                      // Code to execute after _stopService has completed.
+                      String  justlive = await loadDataString('currlive');
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      prefs.remove('currlive');
+                  showNotification();
+                      navigatorKey.currentState!.push(
+                          MaterialPageRoute(builder: (context) => SecondFaceAuth(justlive)));
+
+
+                    });
+
                 }
+
                 return Column(
                   children: [
                     Text('performed ${times.toString()} times'),
+                    SizedBox(height: 8,),
+                    Text(attt),
                   ],
                 );
               },
             ),
+
           ],
         ),
       ),
