@@ -1,10 +1,4 @@
 set back the original duration 80 seconds in main.dart
 
-do something for if someone is on face scanning screen and he/she is not looking at phone for more than 10 seconds, then it should go back to main screen automatically
-
-change navigation and ressult screen of secondauth.dart when someone clicks on authenticate.
-
-ask permission for notification
-
-send  a parameter in result screen of secondauth.dart to main.dart
-change notification timer  and screen timer to 60 seconds
+comment out inside the code
+send real value to notification click of secondfaceauth currlive class

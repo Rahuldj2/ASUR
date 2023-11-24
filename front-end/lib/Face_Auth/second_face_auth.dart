@@ -52,8 +52,9 @@ class _SecondFaceAuthState extends State<SecondFaceAuth> {
 
   @override
   void dispose() {
-    cameraController.dispose();
     _timer.cancel(); // Cancel the timer as well
+    cameraController.dispose();
+
     super.dispose();
   }
 
@@ -102,7 +103,7 @@ class _SecondFaceAuthState extends State<SecondFaceAuth> {
   }
 
   final ImagePicker _picker = ImagePicker();
-
+  late DateTime secondTimestamp;
   bool loading = false;
   bool checked = false;
   var image1 = new Regula.MatchFacesImage();
@@ -118,7 +119,7 @@ class _SecondFaceAuthState extends State<SecondFaceAuth> {
 
 
   late Timer _timer;
-  int _secondsRemaining = 05;
+  int _secondsRemaining = 60;
 
   @override
   void initState() {
@@ -183,6 +184,7 @@ class _SecondFaceAuthState extends State<SecondFaceAuth> {
         if (_secondsRemaining == 0) {
           // Timer reached 0, navigate to homepage
           timer.cancel();
+         markAttendance(widget.coursecode, "A");
           _navigateToHomePage();
         } else {
           setState(() {
@@ -196,7 +198,7 @@ class _SecondFaceAuthState extends State<SecondFaceAuth> {
   void _navigateToHomePage() {
 
     Future.delayed(Duration.zero, () {
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (_) => BottomNavigation(0),
@@ -206,7 +208,20 @@ class _SecondFaceAuthState extends State<SecondFaceAuth> {
 
   }
 
+//
 
+  // Retrieve the first timestamp from SharedPreferences
+  Future<DateTime?> getFirstTimestamp() async {
+    final prefs = await SharedPreferences.getInstance();
+    final int? storedTimestamp = prefs.getInt('firstTimestamp');
+    return storedTimestamp != null ? DateTime.fromMillisecondsSinceEpoch(storedTimestamp) : null;
+  }
+
+  // Calculate the difference between the two timestamps in seconds
+  Future<int> calculateDifferenceInSeconds(DateTime secondTimestamp) async {
+    DateTime? firstTimestamp = await getFirstTimestamp();
+    return (secondTimestamp.difference(firstTimestamp!).inMilliseconds / 1000).round();
+  }
 
 // Function to get the details of the logged-in user
   Future<User?> getCurrentUser() async {
@@ -350,7 +365,12 @@ class _SecondFaceAuthState extends State<SecondFaceAuth> {
     image2 = new Regula.MatchFacesImage();
   }
 
-  matchFaces() {
+  matchFaces()  {
+
+
+    setState(() {
+      loading = true;
+    });
     if (image1.bitmap == null ||
         image1.bitmap == "" ||
         image2.bitmap == null ||
@@ -359,59 +379,54 @@ class _SecondFaceAuthState extends State<SecondFaceAuth> {
       setState(() {
         loading = false;
       });
-      return;
+
     }
-    setState(() {
-      loading = true;
-    });
+
     // setState(() => _similarity = "Processing...");
     var request = new Regula.MatchFacesRequest();
     request.images = [image1, image2];
     Regula.FaceSDK.matchFaces(jsonEncode(request)).then((value) {
+
       var response = Regula.MatchFacesResponse.fromJson(json.decode(value));
       Regula.FaceSDK.matchFacesSimilarityThresholdSplit(
           jsonEncode(response!.results), 0.75)
-          .then((str) {
+          .then((str) async {
         var split = Regula.MatchFacesSimilarityThresholdSplit.fromJson(
             json.decode(str));
-        setState(() {
+
           similarper = split!.matchedFaces.length > 0
               ? (split.matchedFaces[0]!.similarity! * 100)
               : 0;
-          loading = false;
+
           print('similar per ${similarper.toString()}');
+        secondTimestamp = DateTime.now();
+          if(similarper>98){
+            int totinsid=     await loadData("LocationChecks");
+            bool status = false;
 
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  ResultAnimation(similarper > 98 ? true : false),
-            ),
-          );
-
-          // After 4 seconds, pop out of the ResultAnimation screen
-          Future.delayed(Duration(seconds: 4), () async {
-            Navigator.pop(context);
-            if (similarper > 98) {
-              await saveData("FaceMatch", true);
-              await saveDatastring("currlive", widget.coursecode);
-              // coordinates from course code
-              await fetchandSaveClassDetails(widget.coursecode);
-              // todo  save room coordinates also here either make a class with liveclass{String course,double latti,double longitude , double altitude,double major axis , double minor axis}
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => StartChecks(),
-                ),
-              );
-            } else {
-              saveData("FaceMatch", false);
+            //if(totinsid>2) {
+            int differenceInSeconds = await calculateDifferenceInSeconds(
+                secondTimestamp);
+            if (differenceInSeconds <= 60) {
+              status = true;
+              final prefs = await SharedPreferences.getInstance();
+              prefs.remove('firstTimestamp');
             }
-          });
+            // }
+            await markAttendance(widget.coursecode, status ? "P" : "A");
+            await   saveDataint('LocationChecks', 0);
+            await notificationsPlugin.cancel(1);
+          }else{
+            await markAttendance(widget.coursecode,  "A");
+          }
+
+        setState(() {
+          loading = false;
         });
       });
     });
     checked = true;
+  ;
     // After successful matching
   }
 
@@ -506,42 +521,50 @@ class _SecondFaceAuthState extends State<SecondFaceAuth> {
             InkWell(
               onTap: () async {
                 // Show circular progress indicator
+                //_timer.cancel();
                 setState(() {
+
                   loading = true;
                 });
 
                 // Perform the matchFaces operation
-                matchFaces();
+             await   matchFaces();
 
                 // Delay to simulate processing time
                 // await Future.delayed(Duration(seconds: 2));
 
                 // Hide circular progress indicator
 
-                if (similarper > 98) {
-                  // here attendance is marked
-             int totinsid=     await loadData("LocationChecks");
-             bool status = false;
-             if(totinsid>2){
-                status = true;
-             }
-                  await markAttendance(widget.coursecode, status ? "P" : "A");
-          await   saveDataint('LocationChecks', 0);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => BottomNavigation(0),
-                    ),
-                  );
-                }else{
-                  // here user is marked absent
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => BottomNavigation(0),
-                    ),
-                  );
-                }
+
+                // // after all work done
+                // await        Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (context) =>
+                //         ResultAnimation(similarper > 98 ? true : false),
+                //   ),
+                // );
+                //
+                // // After 4 seconds, pop out of the ResultAnimation screen
+                // Future.delayed(Duration(seconds: 4), () async {
+                //   print('popping');
+                //
+                //   Navigator.pop(context);
+                //
+                //
+                //
+                //
+                // });
+
+
+
+                // Navigator.pushReplacement(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (_) => BottomNavigation(0),
+                //   ),
+                // );
+
               },
               child: Container(
                 height: height * 0.05,
@@ -589,8 +612,30 @@ class _SecondFaceAuthState extends State<SecondFaceAuth> {
               ),
             ),
             SizedBox(height: 22),
+           if(checked)
+           Column(
+             children: [
+               Icon(
+                  similarper > 98
+                      ? Icons.check_circle // Green tick
+                      : Icons.cancel, // Red cross
+                  color: similarper>98 ? Colors.green : Colors.red,
+                  size: 100.0,
+                ),
+               SizedBox(
+                 height: 4,
+               ),
+               Text(
+               similarper>98 ? "Authenticated" : "Not Authorized",
+                 style: TextStyle(
+                   color: similarper>98 ? Colors.green : Colors.red,
+                   fontWeight: FontWeight.w500,
+                 ),
+               ),
+             ],
+           ),
 
-            SizedBox(height: 16), // Add some spacing
+    // Add some spacing
 
             // Wrap the content in a Visibility widget
 
@@ -625,7 +670,8 @@ class _SecondFaceAuthState extends State<SecondFaceAuth> {
 
 class ResultAnimation extends StatefulWidget {
   final bool
-  isSuccessful; // Indicates whether the animation should show success or failure
+  isSuccessful;
+
 
   ResultAnimation(this.isSuccessful);
 
@@ -690,7 +736,7 @@ class _ResultAnimationState extends State<ResultAnimation>
               height: 4,
             ),
             Text(
-              widget.isSuccessful ? "Authenticated" : "Not Authorized",
+              widget.isSuccessful ? "Present" : "Absent",
               style: TextStyle(
                 color: widget.isSuccessful ? Colors.green : Colors.red,
                 fontWeight: FontWeight.w500,
@@ -702,6 +748,10 @@ class _ResultAnimationState extends State<ResultAnimation>
     );
   }
 
-
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
 }

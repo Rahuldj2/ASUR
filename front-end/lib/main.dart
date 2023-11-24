@@ -77,7 +77,8 @@ Future<void> onSelectNotification(String? payload) async {
   if (screenToOpen != null) {
     if (screenToOpen == 'faceApp') {
       print('down');
-      navigatorKey.currentState?.pushReplacement(MaterialPageRoute(builder: (_) => SecondFaceAuth("CSD203")));
+
+      navigatorKey.currentState?.pushReplacement(MaterialPageRoute(builder: (_) => SecondFaceAuth("CSD311")));
     } else if (screenToOpen == 'otherScreen') {
       // Handle other screens if needed
     }
@@ -433,7 +434,7 @@ void onStart(ServiceInstance service) async {
     service.stopSelf();
   });
 
-  Timer.periodic(const Duration(seconds: 10), (timer) async {
+  Timer.periodic(const Duration(seconds: 80), (timer) async {
 
 
     if (service is AndroidServiceInstance) {
@@ -464,7 +465,7 @@ void onStart(ServiceInstance service) async {
         print('error in location smmothng $e');
       }
       print('delay started');
-     await Future.delayed(Duration(seconds: 5));//55
+     await Future.delayed(Duration(seconds: 55));//55
       print('delay ended');
       _locationSubscription?.cancel();
       _countdownTimer?.cancel(); // Cancel the countdown timer manually
@@ -550,6 +551,7 @@ class MyApp extends StatelessWidget {
     bool reqSuc = false;
     List<Permission> permissions = [
       Permission.location,
+      Permission.notification
     ];
 
     for (Permission permission in permissions) {

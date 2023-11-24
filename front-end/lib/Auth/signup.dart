@@ -500,6 +500,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 child: Padding(
                                   padding: const EdgeInsets.only(left: 18.0),
                                   child: TextFormField(
+                                    obscureText: true,
                                     controller: _passwordController,
                                     textAlign: TextAlign.left,
                                     decoration: InputDecoration(

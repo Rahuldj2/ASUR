@@ -179,38 +179,23 @@ class _LocationChecksState extends State<LocationChecks> {
               decoration: BoxDecoration(
                   color: Colors.black, borderRadius: BorderRadius.circular(22)),
               child: Column(
+mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                      text,
-                      style: TextStyle(color: Colors.white)
 
-                  ),
-                  SizedBox(height: 5,),
-                  Text(
-                      text1,
-                      style: TextStyle(color: Colors.white)
-
-                  ),
-                  SizedBox(height: 5,),
-                  Text(
-                      text2,
-                      style: TextStyle(color: Colors.white)
-
-                  ),
-                  SizedBox(height: 5,),
                   Text(
                       "No class live now , come back later",
                       style: TextStyle(color: Colors.white)
 
                   ),
                   SizedBox(height: 5,),
-                  ElevatedButton(onPressed: (){
-                    showNotification();
-                  }, child: Text('Send Notification',style: TextStyle(color: Colors.white),),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(
-                          0xff912C2E), // Change this color to the desired background color
-                    ),)
+                  // ElevatedButton(onPressed: (){
+                  //   showNotification();
+                  // }, child: Text('Send Notification',style: TextStyle(color: Colors.white),),
+                  //   style: ElevatedButton.styleFrom(
+                  //     backgroundColor: Color(
+                  //         0xff912C2E), // Change this color to the desired background color
+                  //   ),)
                 ],
               ),
             ),
