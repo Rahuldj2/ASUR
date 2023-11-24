@@ -86,7 +86,10 @@ class _StartChecksState extends State<StartChecks> {
     await prefs.setBool(key, value);
   }
 
-
+  Future<void> storeFirstTimestamp(DateTime timestamp) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('firstTimestamp', timestamp.millisecondsSinceEpoch);
+  }
 
   Future<void>showNotification() async {
     AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
@@ -111,7 +114,7 @@ class _StartChecksState extends State<StartChecks> {
 
 
     // Start the timer for 60 seconds
-    int timerSeconds = 5;
+    int timerSeconds = 60;
     while (timerSeconds > 0) {
       // Update the notification every second with the remaining time
       await Future.delayed(Duration(seconds: 1));
@@ -121,7 +124,7 @@ class _StartChecksState extends State<StartChecks> {
       if(timerSeconds >0){
         await notificationsPlugin.show(
           1,
-          "test",
+          "Face Scan",
           "Time remaining: $timerSeconds seconds",
           notiDetails,
           payload: "faceApp",
@@ -223,6 +226,8 @@ class _StartChecksState extends State<StartChecks> {
                       SharedPreferences prefs = await SharedPreferences.getInstance();
                       prefs.remove('currlive');
                   showNotification();
+                      DateTime timestamp1 = DateTime.now();
+                      storeFirstTimestamp(timestamp1);
                       navigatorKey.currentState!.push(
                           MaterialPageRoute(builder: (context) => SecondFaceAuth(justlive)));
 
