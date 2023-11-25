@@ -142,9 +142,9 @@ Demo credentials for teacher view :-   email :- asur@snu.edu.in      ||     pass
   - Next.js
 ## Contributors
 
-- [Aayush Arora - Flutter Application ]
-- [Rahul Jayaram - Server Side and Next.js Site]
-- [Punyam Singh - FrontEnd of Site]
+- # Aayush Arora - Flutter Application 
+- # Rahul Jayaram - Server Side and Next.js Site
+- # Punyam Singh - FrontEnd of Site
 
 
 
