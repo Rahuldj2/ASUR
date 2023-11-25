@@ -8,7 +8,7 @@
 ## Overview
 ASUR (Attendance System Using Recognition) is a comprehensive solution for automating classroom attendance tracking. Leveraging Flutter, Dart, JavaScript, Express.js, Rest API, and Firebase, the system incorporates geofencing, facial recognition, and real-time tracking to enhance classroom efficiency and improve attendance accuracy.
 
-## Link to DownLoad App
+## Link to Download App
 https://drive.google.com/file/d/1lOX0XJ5lJLaQIj5bs_BUYHTiQhCPrrvR/view?usp=sharing
 
 
