@@ -142,11 +142,11 @@ Demo credentials for teacher view :-   email :- asur@snu.edu.in      ||     pass
   - Next.js
 ## Contributors
 
-- # Aayush Arora - Flutter Application 
-- # Rahul Jayaram - Server Side and Next.js Site
-- # Punyam Singh - FrontEnd of Site
+- ## Aayush Arora - App Frontend (Flutter, Dart, Firebase)
+- ## Rahul Jayaram - Server Side and Backend (Node, Express, Mysql)
+- ## Punyam Singh - Webapp Frontend and Hosting (React, Next, Mysql)
 
 
 
 
-Feel free to contribute and improve the ASUR Attendance System!
+Feel free to contribute and improve the ASUR system!
